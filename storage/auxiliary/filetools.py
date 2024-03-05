@@ -21,16 +21,6 @@ def join_paths(*paths: str) -> str:
     return os.path.join(*paths)
 
 
-def is_file(path: str) -> bool:
-    """
-    Check if a file exists.
-
-    :param path: The path to the file.
-    :return: True if the file exists, False otherwise.
-    """
-    return os.path.exists(path) and os.path.isfile(path)
-
-
 def is_dir(path: str) -> bool:
     """
     Check if a directory exists.
@@ -85,46 +75,6 @@ def remove_dir(path: str) -> None:
         shutil.rmtree(path)
 
 
-def create_empty_file(path: str) -> None:
-    """
-    Create an empty file.
-
-    :param path: File path.
-    """
-    with open(path, "w"):
-        pass
-
-
-def create_file_if_not_exists(path: str) -> None:
-    """
-    Create a file if it does not exist.
-
-    :param path: File path.
-    """
-    if not is_file(path):
-        create_empty_file(path)
-
-
-def remove_file(path: str) -> None:
-    """
-    Remove a file if it exists.
-
-    :param path: File path.
-    """
-    if os.path.exists(path) and not os.path.isdir(path):
-        os.remove(path)
-
-
-def remove_files(paths: List[str]) -> None:
-    """
-    Remove multiple files.
-
-    :param paths: List of file paths.
-    """
-    for path in paths:
-        remove_file(path)
-
-
 def read(path: str, binary=False, encoding: Optional[Encoding] = None) -> str:
     """
     Read the contents of a file.
@@ -138,18 +88,6 @@ def read(path: str, binary=False, encoding: Optional[Encoding] = None) -> str:
     encoding = encoding and encoding.value
     with open(path, mode, encoding=encoding) as file:
         return file.read()
-
-
-def read_lines(path: str, encoding: Encoding = Encoding.ASCII) -> List[str]:
-    """
-    Read the lines of a file and return them as a list.
-
-    :param path: File path.
-    :param encoding: File encoding.
-    :return: List of lines.
-    """
-    with open(path, "r", encoding=encoding.value) as file:
-        return file.readlines()
 
 
 def write(

@@ -1,5 +1,4 @@
 from enum import Enum
-from threading import Lock
 from typing import Optional
 
 from storage.auxiliary.filetools import join_paths
@@ -39,16 +38,6 @@ class PwnedStorageState:
         """
         self.__active_dataset: Optional[DatasetID] = active_dataset
         self.__is_to_be_ignored: bool = False
-        self.__active_requests: int = 0
-        self.__lock: Lock = Lock()
-
-    @property
-    def lock(self) -> Lock:
-        """
-        Get the thread lock for the state.
-        :return: The thread lock.
-        """
-        return self.__lock
 
     @property
     def active_dataset(self) -> Optional[DatasetID]:
@@ -75,28 +64,6 @@ class PwnedStorageState:
         :return: True if the state should be ignored, False otherwise.
         """
         return self.__is_to_be_ignored
-
-    @property
-    def has_active_requests(self) -> bool:
-        """
-        Check if there are active requests.
-        :return: True if there are active requests, False otherwise.
-        """
-        return self.__active_requests > 0
-
-    def count_started_request(self) -> None:
-        """
-        Increment the count of active requests.
-        :return: None
-        """
-        self.__active_requests += 1
-
-    def count_finished_request(self) -> None:
-        """
-        Decrement the count of active requests.
-        :return: None
-        """
-        self.__active_requests -= 1
 
     def mark_to_be_ignored(self) -> None:
         """

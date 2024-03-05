@@ -1,15 +1,8 @@
+import asyncio
 import time
 
 from devops_cli.auxiliary.utils import TextStyle, convert_seconds, stylize_text, write
-from storage.auxiliary.pwned.requester import PwnedRequester
 from storage.core.models.revision import Revision
-from storage.core.models.settings import (
-    NumericType,
-    PwnedStorageSettings,
-    RevisionThreadQuantity,
-    StorageFileQuantity,
-)
-from storage.mocked.mocked_pwned_requester import MockedPwnedRequester
 from storage.pwned_storage import PwnedStorage
 
 CONSOLE_UPDATE_INTERVAL_IN_SECONDS = 1
@@ -62,26 +55,19 @@ def print_status(revision: Revision, last_status: Revision.Status) -> None:
             write("\n")
 
 
-def update_storage(
-    resource_dir: str,
-    file_quantity: StorageFileQuantity,
-    thread_quantity: RevisionThreadQuantity,
-    occasion_numeric_type: NumericType,
-    is_requester_mocked: bool,
-) -> None:
-    """Updates the Pwned storage."""
-    settings = PwnedStorageSettings(
-        resource_dir, file_quantity, thread_quantity, occasion_numeric_type
-    )
-    requester = MockedPwnedRequester() if is_requester_mocked else PwnedRequester()
-    storage = PwnedStorage(settings, requester)
-    last_status = storage.revision.status
-    storage.request_update()
+async def watch_update_status(storage: PwnedStorage) -> None:
+    last_status = Revision.Status.NEW
     if_first_update = True
     while last_status not in [Revision.Status.COMPLETED, Revision.Status.FAILED]:
         if not if_first_update:
-            time.sleep(CONSOLE_UPDATE_INTERVAL_IN_SECONDS)
+            await asyncio.sleep(CONSOLE_UPDATE_INTERVAL_IN_SECONDS)
         if_first_update = False
         revision = storage.revision
         print_status(revision, last_status)
         last_status = revision.status
+
+
+async def update_storage(resource_dir: str) -> None:
+    """Updates the Pwned storage."""
+    storage = PwnedStorage(resource_dir)
+    await asyncio.gather(storage.update(), watch_update_status(storage))

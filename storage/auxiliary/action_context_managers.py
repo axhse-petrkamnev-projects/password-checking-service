@@ -14,8 +14,7 @@ class RevisionStepContextManager:
 
     def __exit__(self, exc_type, exc_value, traceback) -> bool:
         if exc_value is not None:
-            with self.__state.lock:
-                self.__revision.indicate_failed(exc_value)
+            self.__revision.indicate_failed(exc_value)
             return False
         return True
 
