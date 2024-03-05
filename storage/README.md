@@ -13,7 +13,7 @@ from storage.core.models.settings import (
 )
 from storage.pwned_storage import PwnedStorage
 
-settings = PwnedStorageSettings('/tmp/pwned-storage', StorageFileQuantity.N_256, NumericType.SHORT)
+settings = PwnedStorageSettings('/tmp/pwned-storage', StorageFileQuantity.N_256, occasion_numeric_type=NumericType.SHORT)
 storage = PwnedStorage(settings)
 ```
 In this example, storage resources will be located in ***/tmp/pwned-storage***, password leak data will be stored in 256 files and leak occasions will be stored as 2-byte (short) unsigned number (occasion values more than 65535 will be replaced with 65535).

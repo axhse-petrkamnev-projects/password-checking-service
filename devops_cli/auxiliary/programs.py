@@ -6,6 +6,7 @@ from storage.core.models.revision import Revision
 from storage.core.models.settings import (
     NumericType,
     PwnedStorageSettings,
+    RevisionThreadQuantity,
     StorageFileQuantity,
 )
 from storage.mocked.mocked_pwned_requester import MockedPwnedRequester
@@ -64,11 +65,14 @@ def print_status(revision: Revision, last_status: Revision.Status) -> None:
 def update_storage(
     resource_dir: str,
     file_quantity: StorageFileQuantity,
+    thread_quantity: RevisionThreadQuantity,
     occasion_numeric_type: NumericType,
     is_requester_mocked: bool,
 ) -> None:
     """Updates the Pwned storage."""
-    settings = PwnedStorageSettings(resource_dir, file_quantity, occasion_numeric_type)
+    settings = PwnedStorageSettings(
+        resource_dir, file_quantity, thread_quantity, occasion_numeric_type
+    )
     requester = MockedPwnedRequester() if is_requester_mocked else PwnedRequester()
     storage = PwnedStorage(settings, requester)
     last_status = storage.revision.status

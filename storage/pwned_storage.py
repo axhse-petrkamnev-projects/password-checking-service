@@ -70,6 +70,7 @@ class PwnedStorage:
         )
         self.__state_path = join_paths(self.__settings.resource_dir, self.STATE_FILE)
         self.__state: PwnedStorageState = self.__initialize()
+        self.__prepared_prefix_amount: int = 0
         self.__revision_step_manager: RevisionStepContextManager = (
             RevisionStepContextManager(self.__state, self.__revision)
         )
@@ -189,9 +190,30 @@ class PwnedStorage:
     def __prepare_new_dataset(self, dataset: DatasetID) -> None:
         dataset_dir = self.__get_dataset_dir(dataset)
         make_empty_dir(dataset_dir)
+        self.__prepared_prefix_amount = 0
+        for thread_index in range(self.__settings.revision_thread_quantity):
+            ThreadPoolExecutor().submit(
+                self.__step_batch_preparation, dataset, thread_index
+            )
+        while True:
+            with self.__state.lock:
+                if self.__prepared_prefix_amount == PWNED_PREFIX_CAPACITY:
+                    break
+            self.__wait_a_little()
+
+    def __step_batch_preparation(self, dataset: DatasetID, batch_index: int) -> None:
+        with self.__revision_step_manager:
+            self.__prepare_batch(dataset, batch_index)
+
+    def __prepare_batch(self, dataset: DatasetID, batch_index: int) -> None:
+        dataset_dir = self.__get_dataset_dir(dataset)
         file_quantity = self.__settings.file_quantity
         prefix_group_size = PWNED_PREFIX_CAPACITY // file_quantity
-        for file_index in range(file_quantity):
+        thread_quantity = self.__settings.revision_thread_quantity
+        for file_index in range(
+            file_quantity * batch_index // thread_quantity,
+            file_quantity * (batch_index + 1) // thread_quantity,
+        ):
             self.__assert_preparation_is_not_cancelled()
             file_path = join_paths(
                 dataset_dir, f"{number_to_hex_code(file_index, file_quantity)}.dat"
@@ -200,21 +222,26 @@ class PwnedStorage:
                 for prefix_index in range(
                     file_index * prefix_group_size, (file_index + 1) * prefix_group_size
                 ):
-                    hash_prefix = number_to_hex_code(prefix_index, 16**5)
-                    record_text = self.__pwned_requester.get_range(prefix_index)
-                    for record_row in record_text.split():
-                        data_file.write(
+                    hash_prefix = number_to_hex_code(prefix_index, PWNED_PREFIX_CAPACITY)
+                    data_file.write(
+                        b"".join(
                             self.__pwned_converter.record_to_bytes(
                                 record_row, hash_prefix
                             )
+                            for record_row in self.__pwned_requester.get_range(
+                                prefix_index
+                            ).split()
                         )
-                    self.__revision.progress = (
-                        100 * (prefix_index + 1) // PWNED_PREFIX_CAPACITY
                     )
+                    with self.__state.lock:
+                        self.__prepared_prefix_amount += 1
+                        self.__revision.progress = (
+                            100 * self.__prepared_prefix_amount // PWNED_PREFIX_CAPACITY
+                        )
 
     def __assert_preparation_is_not_cancelled(self) -> None:
         with self.__state.lock:
-            if self.__revision.is_cancelling:
+            if self.__revision.is_cancelling or self.__revision.is_failed:
                 raise CancelledError("Data preparation has been cancelled.")
 
     def __initialize(self) -> PwnedStorageState:

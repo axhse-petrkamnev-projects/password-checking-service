@@ -12,6 +12,14 @@ class StorageFileQuantity(Enum):
     N_1048576 = 16**5
 
 
+class RevisionThreadQuantity(Enum):
+    """The number of threads to be used for requesting hashed during revision."""
+
+    N_1 = 1
+    N_16 = 16
+    N_256 = 16**2
+
+
 class NumericType(Enum):
     """Integer numeric types with specific byte size."""
 
@@ -23,21 +31,28 @@ class NumericType(Enum):
 class PwnedStorageSettings:
     """Settings for PwnedStorage."""
 
+    DEFAULT_FILE_QUANTITY = StorageFileQuantity.N_4096
+    DEFAULT_REVISION_THREAD_QUANTITY = RevisionThreadQuantity.N_1
+    DEFAULT_OCCASION_NUMERIC_TYPE = NumericType.INTEGER
+
     def __init__(
         self,
         resource_dir: str,
-        file_quantity: StorageFileQuantity,
-        occasion_numeric_type: NumericType,
+        file_quantity: StorageFileQuantity = DEFAULT_FILE_QUANTITY,
+        revision_thread_quantity: RevisionThreadQuantity = DEFAULT_REVISION_THREAD_QUANTITY,
+        occasion_numeric_type: NumericType = DEFAULT_OCCASION_NUMERIC_TYPE,
     ):
         """
         Initialize a new PwnedStorageSettings instance.
 
         :param resource_dir: The directory path for storing resources.
         :param file_quantity: The number of files (batches) in which the storage stores its data.
+        :param revision_thread_quantity: The number of threads to be used for requesting hashed during revision.
         :param occasion_numeric_type: The numeric type used for storing leak occasion values.
         """
         self.__resource_dir: str = resource_dir
         self.__file_quantity: int = file_quantity.value
+        self.__revision_thread_quantity: int = revision_thread_quantity.value
         self.__occasion_numeric_bytes: int = occasion_numeric_type.value
         self.__file_code_length: int = self.__calculate_file_code_length()
 
@@ -56,6 +71,14 @@ class PwnedStorageSettings:
         :return: The quantity of storage files.
         """
         return self.__file_quantity
+
+    @property
+    def revision_thread_quantity(self) -> int:
+        """
+        Get the quantity of revision threads.
+        :return: The quantity of revision threads.
+        """
+        return self.__revision_thread_quantity
 
     @property
     def occasion_numeric_bytes(self) -> int:

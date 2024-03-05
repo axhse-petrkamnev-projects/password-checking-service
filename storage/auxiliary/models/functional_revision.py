@@ -44,6 +44,14 @@ class FunctionalRevision(Revision):
         """
         return self._status == Revision.Status.CANCELLATION
 
+    @property
+    def is_failed(self) -> bool:
+        """
+        Check if the revision is failed.
+        :return: True if the revision is failed, False otherwise.
+        """
+        return self._status == Revision.Status.FAILED
+
     @Revision.progress.setter
     def progress(self, value: int) -> None:
         """

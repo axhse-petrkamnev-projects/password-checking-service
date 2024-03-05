@@ -2,10 +2,18 @@ import sys
 from enum import Enum
 from typing import List, Union
 
-from storage.core.models.settings import NumericType, StorageFileQuantity
+from storage.core.models.settings import (
+    NumericType,
+    RevisionThreadQuantity,
+    StorageFileQuantity,
+)
 
 STORAGE_FILE_QUANTITY_INT_OPTIONS: List[int] = [
     quantity.value for quantity in StorageFileQuantity
+]
+
+REVISION_THREAD_QUANTITY_INT_OPTIONS: List[int] = [
+    quantity.value for quantity in RevisionThreadQuantity
 ]
 
 NUMERIC_TYPE_INT_OPTIONS: List[int] = [
@@ -26,6 +34,24 @@ def get_storage_file_quantity(file_quantity_number: int) -> StorageFileQuantity:
 
     raise ValueError(
         f"No matching StorageFileQuantity for file quantity number: {file_quantity_number}"
+    )
+
+
+def get_revision_thread_quantity(
+    revision_thread_quantity_number: int,
+) -> RevisionThreadQuantity:
+    """
+    Retrieves the RevisionThreadQuantity value for a given revision thread quantity number.
+
+    :param revision_thread_quantity_number: The revision thread quantity number.
+    :return: The corresponding RevisionThreadQuantity value.
+    """
+    for quantity in RevisionThreadQuantity:
+        if quantity.value == revision_thread_quantity_number:
+            return quantity
+
+    raise ValueError(
+        f"No matching RevisionThreadQuantity for revision thread quantity number: {revision_thread_quantity_number}"
     )
 
 
