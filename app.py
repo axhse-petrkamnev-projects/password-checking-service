@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 
 @app.route("/range/<prefix>")
-def prefix_search(prefix):  # put application's code here
+def prefix_search(prefix):
     try:
         response = storage.get_range(prefix)
         return response, 200, {"Content-Type": "text/plain"}
