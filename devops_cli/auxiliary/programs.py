@@ -2,7 +2,9 @@ import asyncio
 import time
 
 from devops_cli.auxiliary.utils import TextStyle, convert_seconds, stylize_text, write
+from storage.auxiliary.pwned.requester import PwnedRequester
 from storage.core.models.revision import Revision
+from storage.mocked.mocked_pwned_requester import MockedPwnedRequester
 from storage.pwned_storage import PwnedStorage
 
 CONSOLE_UPDATE_INTERVAL_IN_SECONDS = 1
@@ -67,7 +69,10 @@ async def watch_update_status(storage: PwnedStorage) -> None:
         last_status = revision.status
 
 
-async def update_storage(resource_dir: str) -> None:
+async def update_storage(
+    resource_dir: str, coroutines: int, is_requester_mocked: bool
+) -> None:
     """Updates the Pwned storage."""
-    storage = PwnedStorage(resource_dir)
+    requester = MockedPwnedRequester() if is_requester_mocked else PwnedRequester()
+    storage = PwnedStorage(resource_dir, coroutines, requester)
     await asyncio.gather(storage.update(), watch_update_status(storage))
