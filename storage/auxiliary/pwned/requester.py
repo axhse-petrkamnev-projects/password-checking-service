@@ -1,5 +1,7 @@
 import aiohttp
 import urllib3
+import ssl
+import certifi
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -16,6 +18,8 @@ class PwnedRequester:
         :param hash_prefix: The hash prefix to query.
         :return: The range as plain text.
         """
-        async with aiohttp.ClientSession() as session:
+        ssl_context = ssl.create_default_context(cafile=certifi.where())
+        conn = aiohttp.TCPConnector(ssl=ssl_context)
+        async with aiohttp.ClientSession(connector=conn) as session:
             async with session.get(f"{self.PWNED_RANGE_URL}{hash_prefix}") as resp:
                 return (await resp.text()).replace("\r\n", "\n")
