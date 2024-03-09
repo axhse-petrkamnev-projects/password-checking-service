@@ -1,0 +1,101 @@
+.page-neutral {
+    --color-text: #002C60;
+    --color-background: #64BBFF;
+    --color-input-background: #F3FAFF;
+    --color-input-outline-hover: #2F94D5;
+    --color-input-outline-focus: #006FAC;
+    --color-block-background: #D4F4FF;
+}
+.page-success {
+    --color-text: #003912;
+    --color-background: #7FF9C1;
+    --color-input-background: #EFFCF5;
+    --color-input-outline-hover: #48C591;
+    --color-input-outline-focus: #009463;
+    --color-block-background: #CEFBE3;
+}
+.page-warning {
+    --color-text: #580000;
+    --color-background: #FF8D69;
+    --color-input-background: #FFF7F3;
+    --color-input-outline-hover: #D46847;
+    --color-input-outline-focus: #A94426;
+    --color-block-background: #FFE6D7;
+}
+
+body {
+    text-align: center;
+    margin: 0px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: bold;
+    color: var(--color-text);
+    background-color: var(--color-background);
+    transition: all 0.5s ease;
+}
+
+.inline-input {
+    text-align: center;
+    width: 100%;
+    padding: 0px 10px;
+    border: none;
+    outline: none;
+    font-weight: bold;
+    color: var(--color-text);
+    background-color: var(--color-input-background);
+    opacity: 0.8;
+}
+.inline-input::placeholder {
+    color: var(--color-text);
+    opacity: 0.6;
+}
+.inline-input:focus::placeholder {
+    color: transparent;
+}
+
+.input-bar {
+    display: flex;
+    margin-left: 25%;
+    margin-right: 25%;
+    padding: 10px 15px;
+    border-radius: 20px;
+    background-color: var(--color-input-background);
+}
+.input-bar:hover {
+    outline: 2px solid var(--color-input-outline-hover);
+}
+.input-bar:focus-within {
+    outline: 2px solid var(--color-input-outline-focus);
+}
+
+.gap-5vh {
+    height: 5vh;
+}
+.gap-10vh {
+    height: 10vh;
+}
+.gap-20vh {
+    height: 20vh;
+}
+
+.block-text {
+    margin-left: 20%;
+    margin-right: 20%;
+    padding: 15px;
+    border-radius: 20px;
+    text-align: left;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    background-color: var(--color-block-background);
+}
+
+.page-warning .text-success {
+    color: #00A86C;
+}
+
+#password-visibility-toggle {
+    width: 30px;
+    opacity: 0.6;
+}
+#password-visibility-toggle:hover {
+    opacity: 0.8;
+}
