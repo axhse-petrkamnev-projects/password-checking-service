@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 from storage.pwned_storage import PwnedStorage
 import os
+import traceback
 
 def create_app():
     app = Flask(__name__, template_folder="templates")
@@ -17,7 +18,8 @@ def create_app():
         try:
             response = storage.get_range(prefix)
             return response, 200, {"Content-Type": "text/plain"}
-        except:
+        except Exception:
+            traceback.print_exc()
             return "Bad prefix", 400, {"Content-Type": "text/plain"}
 
     return app
