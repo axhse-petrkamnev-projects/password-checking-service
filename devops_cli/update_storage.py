@@ -37,9 +37,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.import_from_file is not None:
         asyncio.run(
-            programs.update_storage(args.resource_dir, args.coroutines, args.mocked)
+            programs.update_storage_from_file(args.resource_dir, args.coroutines, args.import_from_file)
         )
     else:
         asyncio.run(
-            programs.update_storage_from_file(args.resource_dir, args.coroutines, filename)
+            programs.update_storage(args.resource_dir, args.coroutines, args.mocked)
         )
