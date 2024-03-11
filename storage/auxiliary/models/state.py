@@ -5,8 +5,8 @@ from typing import Optional
 class DatasetID(Enum):
     """Dataset identification."""
 
-    A = "1"
-    B = "2"
+    A = "a"
+    B = "b"
 
     @property
     def other(self) -> "DatasetID":
@@ -22,7 +22,7 @@ class DatasetID(Enum):
         Get the data directory name for the dataset.
         :return: The data directory name.
         """
-        return f"hashes{self.value}"
+        return f"hashes-{self.value}"
 
 
 class PwnedStorageState:
