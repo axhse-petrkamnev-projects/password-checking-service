@@ -76,3 +76,12 @@ async def update_storage(
     requester = MockedPwnedRequester() if is_requester_mocked else PwnedRequester()
     storage = PwnedStorage(resource_dir, coroutines, requester)
     await asyncio.gather(storage.update(), watch_update_status(storage))
+
+
+async def update_storage_from_file(
+    resource_dir: str, coroutines: int, filename: str
+) -> None:
+    """Updates the Pwned storage."""
+    requester = MockedPwnedRequester()
+    storage = PwnedStorage(resource_dir, coroutines, requester)
+    await asyncio.gather(storage.update_with_file(filename), watch_update_status(storage))

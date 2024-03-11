@@ -75,6 +75,25 @@ class PwnedStorage:
         self.__revision.indicate_prepared()
         self.__revision.indicate_completed()
 
+    async def update_with_file(self, filename: str) -> None:
+        """
+        Request an update of all Pwned password leak records.
+
+        :param filename: The path to the file that contains the prefixes.
+        :return: The update response status.
+        """
+        self.__revision.indicate_started()
+        make_empty_dir(self.__dataset_dir)
+        self.__prepared_prefix_amount = 0
+        await asyncio.gather(
+            *[
+                self.__prepare_batch_file(batch_index)
+                for batch_index in range(self.__coroutine_number)
+            ]
+        )
+        self.__revision.indicate_prepared()
+        self.__revision.indicate_completed()
+
     @staticmethod
     def __validate_prefix(prefix: str) -> str:
         if not isinstance(prefix, str):
@@ -100,6 +119,59 @@ class PwnedStorage:
                 file_path = join_paths(self.__dataset_dir, f"{hash_prefix}.txt")
                 write(
                     file_path, await self.__pwned_requester.request_range(hash_prefix)
+                )
+                self.__prepared_prefix_amount += 1
+                self.__revision.progress = (
+                    100 * self.__prepared_prefix_amount // PWNED_PREFIX_CAPACITY
+                )
+
+    @staticmethod
+    async def __find_lines_with_prefix(filename, prefix):
+        def find_offset(start, end):
+            nonlocal filename, prefix
+            while start + 1 < end:
+                mid = (start + end) // 2
+                f.seek(mid)
+                f.readline() # Skip possibly partial line
+                line = f.readline().decode('utf-8')
+                if not line:
+                    break # EOF
+                line_prefix = line[:5]
+                if line_prefix < prefix:
+                    start = mid
+                else:
+                    end = mid
+            if start != 0:
+                return end
+            return start
+
+        results = []
+        with open(filename, 'rb') as f:
+            # Find start offset of the prefix
+            start_offset = find_offset(0, f.seek(0, 2))
+
+            # Read and process the lines between the found offsets
+            f.seek(start_offset)
+            if start_offset != 0:
+                f.readline()
+            while True:
+                line = f.readline().decode('utf-8').strip()
+                if not line or not line.startswith(prefix):
+                    break
+                results.append(line[5:])
+
+        return '\n'.join(results)
+
+    async def __prepare_batch_file(self, batch_index: int, filename: str) -> None:
+        with self.__revision_step_manager:
+            for prefix_index in range(
+                batch_index * PWNED_PREFIX_CAPACITY // self.__coroutine_number,
+                (batch_index + 1) * PWNED_PREFIX_CAPACITY // self.__coroutine_number,
+            ):
+                hash_prefix = number_to_hex_code(prefix_index, PWNED_PREFIX_CAPACITY)
+                file_path = join_paths(self.__dataset_dir, f"{hash_prefix}.txt")
+                write(
+                    file_path, await self.__find_lines_with_prefix(filename, hash_prefix)
                 )
                 self.__prepared_prefix_amount += 1
                 self.__revision.progress = (

@@ -21,6 +21,13 @@ if __name__ == "__main__":
         f" Default: {PwnedStorage.DEFAULT_COROUTINE_NUMBER}.",
     )
     parser.add_argument(
+        "--import_from_file",
+        type=str,
+        default=None,
+        help="The file with sorted hashes to be imported (in the format of the official pwned passwords downloader)."
+        " By default the HIBP API is used.",
+    )
+    parser.add_argument(
         "-m",
         "--mocked",
         action="store_true",
@@ -28,6 +35,11 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    asyncio.run(
-        programs.update_storage(args.resource_dir, args.coroutines, args.mocked)
-    )
+    if args.import_from_file is not None:
+        asyncio.run(
+            programs.update_storage(args.resource_dir, args.coroutines, args.mocked)
+        )
+    else:
+        asyncio.run(
+            programs.update_storage_from_file(args.resource_dir, args.coroutines, filename)
+        )
