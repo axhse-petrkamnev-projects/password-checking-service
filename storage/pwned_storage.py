@@ -87,7 +87,7 @@ class PwnedStorage:
         self.__prepared_prefix_amount = 0
         await asyncio.gather(
             *[
-                self.__prepare_batch_file(batch_index)
+                self.__prepare_batch_file(batch_index, filename)
                 for batch_index in range(self.__coroutine_number)
             ]
         )
