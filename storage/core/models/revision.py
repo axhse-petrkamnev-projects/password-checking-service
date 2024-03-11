@@ -13,11 +13,9 @@ class Revision:
         PREPARATION = "preparation"
         TRANSITION = "transition"
         PURGE = "purge"
-        CANCELLATION = "cancellation"
 
         COMPLETED = "completed"
         FAILED = "failed"
-        CANCELLED = "cancelled"
 
     def __init__(
         self,

@@ -120,9 +120,6 @@ class PwnedStorage:
         :return: The update response status.
         """
         await self.__prepare_new_dataset(new_dataset)
-        if self.__revision.is_cancelling:
-            self.__revision.indicate_cancelled()
-            self.__remove_dataset(new_dataset)
         self.__revision.indicate_prepared()
         while self.__state.has_active_requests:
             await self.__wait_a_little()

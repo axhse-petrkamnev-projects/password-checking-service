@@ -37,14 +37,6 @@ class FunctionalRevision(Revision):
         return self._status == Revision.Status.TRANSITION
 
     @property
-    def is_cancelling(self) -> bool:
-        """
-        Check if the revision is in the cancellation state.
-        :return: True if the revision is cancelling, False otherwise.
-        """
-        return self._status == Revision.Status.CANCELLATION
-
-    @property
     def is_failed(self) -> bool:
         """
         Check if the revision is failed.
@@ -77,19 +69,10 @@ class FunctionalRevision(Revision):
         """Indicate that the transition has completed."""
         self._status = Revision.Status.PURGE
 
-    def indicate_cancellation(self) -> None:
-        """Indicate that the cancellation has started."""
-        self._status = Revision.Status.CANCELLATION
-
     def indicate_completed(self) -> None:
         """Indicate that the revision has completed successfully."""
         self.__set_end_ts()
         self._status = Revision.Status.COMPLETED
-
-    def indicate_cancelled(self) -> None:
-        """Indicate that the revision has been cancelled."""
-        self.__set_end_ts()
-        self._status = Revision.Status.CANCELLED
 
     def indicate_failed(self, error: Exception) -> None:
         """
