@@ -2,15 +2,16 @@ import asyncio
 import time
 
 from devops_cli.auxiliary.utils import TextStyle, convert_seconds, stylize_text, write
-from storage.auxiliary.pwned.requester import PwnedRequester
 from storage.core.models.revision import Revision
-from storage.mocked.mocked_pwned_requester import MockedPwnedRequester
-from storage.pwned_storage import PwnedStorage
+from storage.implementations.file_range_provider import FileRangeImporter
+from storage.implementations.mocked_requester import MockedPwnedRequester
+from storage.implementations.pwned_storage import PwnedStorage
+from storage.implementations.requester import PwnedRequester
 
 CONSOLE_UPDATE_INTERVAL_IN_SECONDS = 1
 
 
-def print_status(revision: Revision, last_status: Revision.Status) -> None:
+def __print_status(revision: Revision, last_status: Revision.Status) -> None:
     """Updates the current status of Pwned storage update."""
 
     def __is_completed(status: Revision.Status) -> bool:
@@ -57,7 +58,7 @@ def print_status(revision: Revision, last_status: Revision.Status) -> None:
             write("\n")
 
 
-async def watch_update_status(storage: PwnedStorage) -> None:
+async def __watch_update_status(storage: PwnedStorage) -> None:
     last_status = Revision.Status.NEW
     if_first_update = True
     while last_status not in [Revision.Status.COMPLETED, Revision.Status.FAILED]:
@@ -65,8 +66,12 @@ async def watch_update_status(storage: PwnedStorage) -> None:
             await asyncio.sleep(CONSOLE_UPDATE_INTERVAL_IN_SECONDS)
         if_first_update = False
         revision = storage.revision
-        print_status(revision, last_status)
+        __print_status(revision, last_status)
         last_status = revision.status
+
+
+async def __update_storage(storage: PwnedStorage) -> None:
+    await asyncio.gather(storage.update(), __watch_update_status(storage))
 
 
 async def update_storage(
@@ -75,13 +80,11 @@ async def update_storage(
     """Updates the Pwned storage."""
     requester = MockedPwnedRequester() if is_requester_mocked else PwnedRequester()
     storage = PwnedStorage(resource_dir, coroutines, requester)
-    await asyncio.gather(storage.update(), watch_update_status(storage))
+    await __update_storage(storage)
 
 
-async def update_storage_from_file(
-    resource_dir: str, coroutines: int, filename: str
-) -> None:
-    """Updates the Pwned storage."""
-    requester = MockedPwnedRequester()
-    storage = PwnedStorage(resource_dir, coroutines, requester)
-    await asyncio.gather(storage.update_with_file(filename), watch_update_status(storage))
+async def update_storage_from_file(resource_dir: str, data_file_path: str) -> None:
+    """Updates the Pwned storage from a file."""
+    provider = FileRangeImporter(data_file_path)
+    storage = PwnedStorage(resource_dir, 1, provider)
+    await __update_storage(storage)

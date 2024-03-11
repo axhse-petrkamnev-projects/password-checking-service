@@ -2,7 +2,7 @@ import argparse
 import asyncio
 
 from devops_cli.auxiliary import programs
-from storage.pwned_storage import PwnedStorage
+from storage.implementations.pwned_storage import PwnedStorage
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Update Pwned leak record storage.")
@@ -21,7 +21,8 @@ if __name__ == "__main__":
         f" Default: {PwnedStorage.DEFAULT_COROUTINE_NUMBER}.",
     )
     parser.add_argument(
-        "--import_from_file",
+        "-f",
+        "--data-file",
         type=str,
         default=None,
         help="The file with sorted hashes to be imported (in the format of the official pwned passwords downloader)."
@@ -35,11 +36,9 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    if args.import_from_file is not None:
-        asyncio.run(
-            programs.update_storage_from_file(args.resource_dir, args.coroutines, args.import_from_file)
-        )
-    else:
-        asyncio.run(
-            programs.update_storage(args.resource_dir, args.coroutines, args.mocked)
-        )
+    program = (
+        programs.update_storage_from_file(args.resource_dir, args.data_file)
+        if args.data_file is not None
+        else programs.update_storage(args.resource_dir, args.coroutines, args.mocked)
+    )
+    asyncio.run(program)

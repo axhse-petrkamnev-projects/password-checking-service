@@ -2,7 +2,7 @@ from hashlib import sha1
 from typing import List
 
 from storage.auxiliary.pwned.model import PWNED_PREFIX_LENGTH
-from storage.auxiliary.pwned.requester import PwnedRequester
+from storage.implementations.requester import PwnedRequester
 
 
 class MockedPwnedRequester(PwnedRequester):
@@ -20,7 +20,7 @@ class MockedPwnedRequester(PwnedRequester):
         ]
         self.__lines.sort()
 
-    async def request_range(self, hash_prefix: str) -> str:
+    async def get_range(self, hash_prefix: str) -> str:
         """
         Requests the Pwned password leak record range for a hash prefix.
         The real range is requested for '00000' prefix.
@@ -31,7 +31,7 @@ class MockedPwnedRequester(PwnedRequester):
         """
         hash_prefix = hash_prefix.upper()
         if hash_prefix == "00000":
-            return await super().request_range(hash_prefix)
+            return await super().get_range(hash_prefix)
         num = int(hash_prefix, base=16)
         offset = (num + 3234) % 54347 % (self.RECORD_QUANTITY * 9 // 11 + 1) + 1
         amount = (num + 2832) % 71203 % 8235 % 4 + 1
