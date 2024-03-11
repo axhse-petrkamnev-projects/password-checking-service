@@ -21,6 +21,16 @@ def join_paths(*paths: str) -> str:
     return os.path.join(*paths)
 
 
+def is_file(path: str) -> bool:
+    """
+    Check if a file exists.
+
+    :param path: The path to the file.
+    :return: True if the file exists, False otherwise.
+    """
+    return os.path.exists(path) and os.path.isfile(path)
+
+
 def is_dir(path: str) -> bool:
     """
     Check if a directory exists.

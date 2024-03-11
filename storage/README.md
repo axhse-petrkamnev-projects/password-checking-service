@@ -10,7 +10,9 @@ Then, it's possible to get leak record range:
 from storage.implementations.pwned_storage import PwnedStorage
 
 storage = PwnedStorage('/tmp/pwned-storage')
-records = storage.get_range('90ABC')
+
+async def get_records():
+    return await storage.get_range('90ABC')
 ```
 
 In this example, storage resources will be located in ***/tmp/pwned-storage***.

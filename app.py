@@ -17,9 +17,9 @@ def create_app():
         return render_template("client-page.html")
 
     @app.route("/range/<prefix>")
-    def prefix_search(prefix):
+    async def prefix_search(prefix):
         try:
-            response = storage.get_range(prefix)
+            response = await storage.get_range(prefix)
             return response, 200, {"Content-Type": "text/plain"}
         except Exception:
             traceback.print_exc()
