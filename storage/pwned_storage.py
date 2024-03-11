@@ -55,7 +55,7 @@ class PwnedStorage:
         :return: The range as plain text.
         """
         prefix = self.__validate_prefix(prefix)
-        data_file_path = join_paths(self.__dataset_dir, f"{prefix}.dat")
+        data_file_path = join_paths(self.__dataset_dir, f"{prefix}.txt")
         return read(data_file_path)
 
     async def update(self) -> None:
