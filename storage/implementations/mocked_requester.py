@@ -31,7 +31,7 @@ class MockedPwnedRequester(PwnedRequester):
             self.__extra_records.setdefault(password_hash[:5], list())
             self.__extra_records[password_hash[:5]].append(record)
 
-    async def request_range(self, hash_prefix: str) -> str:
+    async def get_range(self, hash_prefix: str) -> str:
         hash_prefix = hash_prefix.upper()
         if hash_prefix == "00000":
             return await super().get_range(hash_prefix)
