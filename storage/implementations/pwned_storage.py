@@ -1,5 +1,6 @@
 import asyncio
 import json
+from enum import Enum
 from json import JSONDecodeError
 
 from storage.auxiliary.action_context_managers import RevisionStepContextManager
@@ -19,6 +20,14 @@ from storage.auxiliary.pwned.model import PWNED_PREFIX_CAPACITY
 from storage.core.models.range_provider import PwnedRangeProvider
 from storage.core.models.revision import Revision
 from storage.implementations.requester import PwnedRequester
+
+
+class UpdateResult(Enum):
+    """Possible result of an update."""
+
+    IRRELEVANT = "irrelevant"
+    DONE = "done"
+    FAILED = "failed"
 
 
 class PwnedStorage:
@@ -80,15 +89,20 @@ class PwnedStorage:
         finally:
             self.__state.count_finished_request()
 
-    async def update(self) -> None:
+    async def update(self) -> UpdateResult:
         """Perform storage update."""
+        if not self.__revision.is_idle:
+            return UpdateResult.IRRELEVANT
+        self.__revision.indicate_started()
         new_dataset = (self.__state.active_dataset or DatasetID.B).other
         try:
             await self.__update(new_dataset)
         except Exception as error:
             self.__revision.indicate_failed(error)
             self.__remove_dataset(new_dataset)
-            return
+        if self.__revision.is_failed:
+            return UpdateResult.FAILED
+        return UpdateResult.DONE
 
     @staticmethod
     def __validate_prefix(prefix: str) -> str:
