@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - type: volume
+        source: storage_volume
+        target: /data
+      # Uncomment the line below to mount the .txt file from host to container
+      # - type: bind
+      #   source: /path/on/host/to/pwnedpasswords.txt
+      #   target: /data/pwnedpasswords.txt
+    environment:
+      RESOURCE_DIR: /data
+volumes:
+  storage_volume:
