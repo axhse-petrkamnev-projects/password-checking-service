@@ -99,7 +99,7 @@ class PwnedStorage:
             await self.__update(new_dataset)
         except Exception as error:
             self.__revision.indicate_failed(error)
-            self.__remove_dataset(new_dataset)
+            await self.__remove_dataset(new_dataset)
         if self.__revision.is_failed:
             return UpdateResult.FAILED
         return UpdateResult.DONE
@@ -143,12 +143,12 @@ class PwnedStorage:
         self.__state.mark_not_to_be_ignored()
         self.__dump_state()
         self.__revision.indicate_transited()
-        self.__remove_dataset(new_dataset.other)
+        await self.__remove_dataset(new_dataset.other)
         self.__revision.indicate_completed()
 
     async def __prepare_new_dataset(self, dataset: DatasetID) -> None:
         dataset_dir = self.__get_dataset_dir(dataset)
-        make_empty_dir(dataset_dir)
+        await asyncio.to_thread(lambda: make_empty_dir(dataset_dir))
         await asyncio.gather(
             *[
                 self.__prepare_batch(dataset, batch_index)
@@ -172,9 +172,9 @@ class PwnedStorage:
                     100 * self.__prepared_prefix_amount // PWNED_PREFIX_CAPACITY
                 )
 
-    def __remove_dataset(self, dataset: DatasetID) -> None:
+    async def __remove_dataset(self, dataset: DatasetID) -> None:
         try:
-            remove_dir(self.__get_dataset_dir(dataset))
+            await asyncio.to_thread(lambda: remove_dir(self.__get_dataset_dir(dataset)))
         except Exception as error:
             pass
 
